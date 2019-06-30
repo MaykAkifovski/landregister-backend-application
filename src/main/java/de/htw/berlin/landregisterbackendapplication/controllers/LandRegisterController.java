@@ -5,9 +5,7 @@ import de.htw.berlin.landregisterbackendapplication.services.LandRegisterService
 import de.htw.berlin.landregisterbackendapplication.services.UserRegistrationEnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +26,10 @@ public class LandRegisterController {
     @GetMapping("/queryAllLandRegisters")
     public List<LandRegister> queryAllLandRegisters() {
         return landRegisterService.queryAllLandRegisters();
+    }
+
+    @PostMapping(path = "/queryLandRegister/{id}")
+    public LandRegister queryLandRegister(@PathVariable String id) {
+        return landRegisterService.queryLandRegister(id);
     }
 }
