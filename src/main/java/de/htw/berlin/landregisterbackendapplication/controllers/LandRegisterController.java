@@ -1,5 +1,6 @@
 package de.htw.berlin.landregisterbackendapplication.controllers;
 
+import de.htw.berlin.landregisterbackendapplication.hyperledger.user.UserContextDB;
 import de.htw.berlin.landregisterbackendapplication.models.LandRegister;
 import de.htw.berlin.landregisterbackendapplication.services.LandRegisterService;
 import de.htw.berlin.landregisterbackendapplication.services.UserRegistrationEnrollmentService;
@@ -9,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/landregister")
+import static de.htw.berlin.landregisterbackendapplication.hyperledger.user.UserContextDB.areUsersNotCreated;
+
+@RestController
 @CrossOrigin
 public class LandRegisterController {
 
@@ -25,11 +28,17 @@ public class LandRegisterController {
 
     @GetMapping("/queryAllLandRegisters")
     public List<LandRegister> queryAllLandRegisters() {
+        if (areUsersNotCreated()) {
+            userRegistrationEnrollmentService.registerEnrollUser();
+        }
         return landRegisterService.queryAllLandRegisters();
     }
 
     @PostMapping(path = "/queryLandRegister/{id}")
     public LandRegister queryLandRegister(@PathVariable String id) {
+        if (areUsersNotCreated()) {
+            userRegistrationEnrollmentService.registerEnrollUser();
+        }
         return landRegisterService.queryLandRegister(id);
     }
 }

@@ -10,11 +10,11 @@ import lombok.*;
 public class Owner {
     private String identityNumber;
     private String title;
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
     private String dateOfBirth;
     private String postcode;
     private String city;
     private String street;
-    private String streetnumber;
+    private String streetNumber;
 }

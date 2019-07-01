@@ -78,8 +78,11 @@ public class LandRegisterServiceImpl implements LandRegisterService {
 
     private List<LandRegisterWrapper> transformToLandRegisterWrapper(String landRegistersAsString) {
         try {
-            return new ObjectMapper().readValue(landRegistersAsString, new TypeReference<List<LandRegisterWrapper>>() {
+            LOGGER.info("Transforming {} to {}", landRegistersAsString, LandRegisterWrapper.class);
+            List<LandRegisterWrapper> result = new ObjectMapper().readValue(landRegistersAsString, new TypeReference<List<LandRegisterWrapper>>() {
             });
+            LOGGER.info("Result of transforming String to LandRegisterWrapper {}", result);
+            return result;
         } catch (IOException e) {
             LOGGER.error(Arrays.toString(e.getStackTrace()));
             return emptyList();
@@ -107,6 +110,7 @@ public class LandRegisterServiceImpl implements LandRegisterService {
 
     private LandRegister transformToLandRegister(String landRegisterAsString) {
         try {
+            LOGGER.info("Transforming {} to {}", landRegisterAsString, LandRegister.class);
             return new ObjectMapper().readValue(landRegisterAsString, LandRegister.class);
         } catch (IOException e) {
             LOGGER.error(Arrays.toString(e.getStackTrace()));
