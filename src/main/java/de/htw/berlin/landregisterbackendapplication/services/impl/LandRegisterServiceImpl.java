@@ -5,20 +5,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.htw.berlin.landregisterbackendapplication.hyperledger.client.ChannelClient;
 import de.htw.berlin.landregisterbackendapplication.hyperledger.client.FabricClient;
+import de.htw.berlin.landregisterbackendapplication.models.FrontendResponse;
 import de.htw.berlin.landregisterbackendapplication.models.LandRegister;
 import de.htw.berlin.landregisterbackendapplication.models.LandRegisterWrapper;
 import de.htw.berlin.landregisterbackendapplication.models.ReservationNoteRequest;
 import de.htw.berlin.landregisterbackendapplication.services.LandRegisterService;
-import org.hyperledger.fabric.sdk.Channel;
-import org.hyperledger.fabric.sdk.Orderer;
-import org.hyperledger.fabric.sdk.Peer;
-import org.hyperledger.fabric.sdk.ProposalResponse;
+import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.exception.CryptoException;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
+import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -135,42 +133,47 @@ public class LandRegisterServiceImpl implements LandRegisterService {
     }
 
     @Override
-    public HttpStatus createLandRegister(LandRegister landRegister) {
+    public FrontendResponse createLandRegister(LandRegister landRegister) {
         try {
-            ChannelClient channelClient = evalChannelClient();
             String landRegisterAsString = transformLandRegisterToString(landRegister);
             LOGGER.info("Create land register with Id = {}", landRegisterAsString);
-            Collection<ProposalResponse> responses = channelClient.invokeChainCode(CHAINCODE_1_NAME, FUNCTION_CREATE_LANDREGISTER, new String[]{landRegisterAsString});
-            return responses.stream()
-                    .allMatch(ProposalResponse::isVerified)
-                    ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+            return invokeChainCode(FUNCTION_CREATE_LANDREGISTER, new String[]{landRegisterAsString});
         } catch (Exception e) {
             LOGGER.error(Arrays.toString(e.getStackTrace()));
+            return new FrontendResponse(false, Arrays.toString(e.getStackTrace()));
         }
-        return HttpStatus.BAD_REQUEST;
+    }
+
+    @Override
+    public FrontendResponse createReservationNote(ReservationNoteRequest reservationNoteRequest) {
+        try {
+            String reservationNoteRequestAsString = reservationNoteRequestToString(reservationNoteRequest);
+            LOGGER.info("Creating reservation note Id = {}", reservationNoteRequestAsString);
+            return invokeChainCode(FUNCTION_CREATE_RESERVATION_NOTE, new String[]{reservationNoteRequestAsString});
+        } catch (Exception e) {
+            LOGGER.error(Arrays.toString(e.getStackTrace()));
+            return new FrontendResponse(false, Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    private FrontendResponse invokeChainCode(String functionName, String[] args) throws IllegalAccessException, InvocationTargetException, InvalidArgumentException, TransactionException, InstantiationException, CryptoException, NoSuchMethodException, ClassNotFoundException, ProposalException {
+        ChannelClient channelClient = evalChannelClient();
+        Collection<ProposalResponse> responses = channelClient.invokeChainCode(CHAINCODE_1_NAME, functionName, args);
+        return createFrontendResponse(responses);
     }
 
     private String transformLandRegisterToString(LandRegister landRegister) throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(landRegister);
     }
 
-    @Override
-    public HttpStatus createReservationNote(ReservationNoteRequest reservationNoteRequest) {
-        try {
-            ChannelClient channelClient = evalChannelClient();
-            String landRegisterAsString = reservationNoteRequestToString(reservationNoteRequest);
-            LOGGER.info("Creating reservation note Id = {}", landRegisterAsString);
-            Collection<ProposalResponse> responses = channelClient.invokeChainCode(CHAINCODE_1_NAME, FUNCTION_CREATE_RESERVATION_NOTE, new String[]{landRegisterAsString});
-            return responses.stream()
-                    .allMatch(ProposalResponse::isVerified)
-                    ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
-        } catch (Exception e) {
-            LOGGER.error(Arrays.toString(e.getStackTrace()));
-        }
-        return HttpStatus.BAD_REQUEST;
-    }
-
     private String reservationNoteRequestToString(ReservationNoteRequest reservationNoteRequest) throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(reservationNoteRequest);
+    }
+
+    private FrontendResponse createFrontendResponse(Collection<ProposalResponse> responses) {
+        boolean isSuccessful = responses.stream()
+                .allMatch(ProposalResponse::isVerified);
+        String message = responses.stream().findFirst().map(ChaincodeResponse::getMessage).orElse("");
+        return new FrontendResponse(isSuccessful, message);
     }
 }
