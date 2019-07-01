@@ -1,7 +1,7 @@
 package de.htw.berlin.landregisterbackendapplication.controllers;
 
-import de.htw.berlin.landregisterbackendapplication.hyperledger.user.UserContextDB;
 import de.htw.berlin.landregisterbackendapplication.models.LandRegister;
+import de.htw.berlin.landregisterbackendapplication.models.ReservationNoteRequest;
 import de.htw.berlin.landregisterbackendapplication.services.LandRegisterService;
 import de.htw.berlin.landregisterbackendapplication.services.UserRegistrationEnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +40,21 @@ public class LandRegisterController {
             userRegistrationEnrollmentService.registerEnrollUser();
         }
         return landRegisterService.queryLandRegister(id);
+    }
+
+    @PostMapping(path = "/createLandRegister")
+    public HttpStatus createLandRegister(@RequestBody LandRegister landRegister) {
+        if (areUsersNotCreated()) {
+            userRegistrationEnrollmentService.registerEnrollUser();
+        }
+        return landRegisterService.createLandRegister(landRegister);
+    }
+
+    @PostMapping(path = "/createReservationNote")
+    public HttpStatus createReservationNote(@RequestBody ReservationNoteRequest reservationNoteRequest) {
+        if (areUsersNotCreated()) {
+            userRegistrationEnrollmentService.registerEnrollUser();
+        }
+        return landRegisterService.createReservationNote(reservationNoteRequest);
     }
 }

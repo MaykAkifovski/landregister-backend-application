@@ -1,9 +1,6 @@
 package de.htw.berlin.landregisterbackendapplication.hyperledger.client;
 
-import org.hyperledger.fabric.sdk.ChaincodeID;
-import org.hyperledger.fabric.sdk.Channel;
-import org.hyperledger.fabric.sdk.ProposalResponse;
-import org.hyperledger.fabric.sdk.QueryByChaincodeRequest;
+import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.slf4j.Logger;
@@ -29,7 +26,7 @@ public class ChannelClient {
         return channel;
     }
 
-    public Collection<ProposalResponse> queryByChainCode(String chaincodeName, String functionName, String[] args) throws ProposalException, InvalidArgumentException {
+    public Collection<ProposalResponse> queryChainCode(String chaincodeName, String functionName, String[] args) throws ProposalException, InvalidArgumentException {
         LOGGER.info("Querying {} on channel {}", functionName, channel.getName());
         QueryByChaincodeRequest request = fabricClient.getInstance().newQueryProposalRequest();
         ChaincodeID ccid = ChaincodeID.newBuilder().setName(chaincodeName).build();
@@ -39,5 +36,19 @@ public class ChannelClient {
             request.setArgs(args);
         }
         return channel.queryByChaincode(request);
+    }
+
+    public Collection<ProposalResponse> invokeChainCode(String chaincodeName, String functionName, String[] args) throws InvalidArgumentException, ProposalException {
+        LOGGER.info("Invoking {} on channel {}", functionName, channel.getName());
+        TransactionProposalRequest request = fabricClient.getInstance().newTransactionProposalRequest();
+        ChaincodeID ccid = ChaincodeID.newBuilder().setName(chaincodeName).build();
+        request.setChaincodeID(ccid);
+        request.setFcn(functionName);
+        request.setArgs(args);
+        request.setProposalWaitTime(1000);
+
+        Collection<ProposalResponse> response = channel.sendTransactionProposal(request, channel.getPeers());
+        channel.sendTransaction(response);
+        return response;
     }
 }
