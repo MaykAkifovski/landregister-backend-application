@@ -35,7 +35,6 @@ import static java.util.Collections.singletonList;
 public class LandRegisterServiceImpl implements LandRegisterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LandRegisterService.class);
-    private FabricClient fabricClient;
 
     @Override
     public List<LandRegister> queryAllLandRegisters() {
@@ -140,7 +139,7 @@ public class LandRegisterServiceImpl implements LandRegisterService {
             return invokeChainCode(FUNCTION_CREATE_LANDREGISTER, new String[]{landRegisterAsString});
         } catch (Exception e) {
             LOGGER.error(Arrays.toString(e.getStackTrace()));
-            return new FrontendResponse(false, Arrays.toString(e.getStackTrace()));
+            return new FrontendResponse(false, e.getLocalizedMessage());
         }
     }
 
@@ -152,7 +151,7 @@ public class LandRegisterServiceImpl implements LandRegisterService {
             return invokeChainCode(FUNCTION_CREATE_RESERVATION_NOTE, new String[]{reservationNoteRequestAsString});
         } catch (Exception e) {
             LOGGER.error(Arrays.toString(e.getStackTrace()));
-            return new FrontendResponse(false, Arrays.toString(e.getStackTrace()));
+            return new FrontendResponse(false, e.getMessage());
         }
     }
 

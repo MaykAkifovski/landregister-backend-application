@@ -1,5 +1,6 @@
 package de.htw.berlin.landregisterbackendapplication.controllers;
 
+import de.htw.berlin.landregisterbackendapplication.models.FrontendResponse;
 import de.htw.berlin.landregisterbackendapplication.models.LandRegister;
 import de.htw.berlin.landregisterbackendapplication.models.ReservationNoteRequest;
 import de.htw.berlin.landregisterbackendapplication.services.LandRegisterService;
@@ -43,7 +44,7 @@ public class LandRegisterController {
     }
 
     @PostMapping(path = "/createLandRegister")
-    public HttpStatus createLandRegister(@RequestBody LandRegister landRegister) {
+    public FrontendResponse createLandRegister(@RequestBody LandRegister landRegister) {
         if (areUsersNotCreated()) {
             userRegistrationEnrollmentService.registerEnrollUser();
         }
@@ -51,7 +52,7 @@ public class LandRegisterController {
     }
 
     @PostMapping(path = "/createReservationNote")
-    public HttpStatus createReservationNote(@RequestBody ReservationNoteRequest reservationNoteRequest) {
+    public FrontendResponse createReservationNote(@RequestBody ReservationNoteRequest reservationNoteRequest) {
         if (areUsersNotCreated()) {
             userRegistrationEnrollmentService.registerEnrollUser();
         }
