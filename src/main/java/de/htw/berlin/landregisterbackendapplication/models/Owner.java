@@ -17,4 +17,5 @@ public class Owner {
     private String city;
     private String street;
     private String streetNumber;
+    private String coOwnership;
 }

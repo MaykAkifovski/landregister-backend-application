@@ -7,10 +7,10 @@ import de.htw.berlin.landregisterbackendapplication.models.ReservationNoteReques
 import java.util.List;
 
 public interface LandRegisterService {
+
     List<LandRegister> queryAllLandRegisters();
 
     LandRegister queryLandRegister(String id);
-
 
     FrontendResponse createLandRegister(LandRegister landRegister);
 
